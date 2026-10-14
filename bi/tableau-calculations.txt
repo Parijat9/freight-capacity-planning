@@ -1,0 +1,7 @@
+// Create each named calculation separately in Tableau.
+// WAPE
+IF SUM([actual]) != 0 THEN SUM(ABS([actual]-[forecast]))/SUM([actual]) END
+// Forecast Bias
+IF SUM([actual]) != 0 THEN (SUM([forecast])-SUM([actual]))/SUM([actual]) END
+// Interval Coverage
+AVG([covered])

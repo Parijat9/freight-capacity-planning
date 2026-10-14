@@ -1,0 +1,6 @@
+Actual Loads = SUM(ForecastDetail[actual])
+Forecast Loads = SUM(ForecastDetail[forecast])
+Absolute Error = SUMX(ForecastDetail, ABS(ForecastDetail[actual] - ForecastDetail[forecast]))
+WAPE = DIVIDE([Absolute Error], [Actual Loads])
+Interval Coverage = AVERAGE(ForecastDetail[covered])
+Forecast Bias = DIVIDE([Forecast Loads] - [Actual Loads], [Actual Loads])

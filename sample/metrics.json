@@ -1,0 +1,10 @@
+{
+  "data": "synthetic",
+  "train_weeks": 104,
+  "test_weeks": 12,
+  "lanes": 6,
+  "forecast_wape": 0.05721306424279771,
+  "interval_coverage": 0.7916666666666666,
+  "expected_weekly_cost_usd": 508718.33,
+  "scenario_cost_difference_usd": 3999.16
+}

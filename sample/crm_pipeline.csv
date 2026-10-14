@@ -1,0 +1,7 @@
+lane_id,open_deals,unweighted_loads,expected_incremental_loads,smallest_stage_sample
+L01,4,15,3.75,80
+L02,4,12,6.2857142857142865,80
+L03,4,12,8.428571428571427,80
+L04,4,13,3.25,80
+L05,4,14,7.333333333333334,80
+L06,4,13,9.13095238095238,80
