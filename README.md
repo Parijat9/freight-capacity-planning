@@ -1,87 +1,59 @@
-# Freight capacity planning
+# Freight demand and capacity planning
 
-How much capacity should a planner reserve before the next week starts? Reserving
-too much wastes contracted capacity. Reserving too little exposes the operation to
-spot prices and service shortfalls. This project combines booked-load forecasting,
-CRM opportunity weighting and a costed capacity decision.
+Helps a planner compare how much freight capacity to reserve for the coming week.
 
-![Capacity review](docs/preview.png)
+Reserving too much leaves paid capacity unused. Reserving too little means buying extra capacity or leaving loads uncovered. This project compares those costs using past demand and possible new work.
 
-## Run it
+![Weekly demand and capacity report](docs/preview.png)
 
-Python 3.10 or newer. The analysis uses the standard library and needs no credentials.
+[Open the sample report](https://parijat9.github.io/reports/capacity.html) · [Download the Excel model](excel/capacity-plan.xlsx)
+
+## What it does
+
+- Estimates weekly demand for six routes.
+- Checks the estimates against weeks that were not used to build the forecast.
+- Adds possible new work from sample sales opportunities.
+- Compares reserved capacity, extra capacity and uncovered loads.
+- Lets a planner change the assumptions in Excel.
+
+## Try it
+
+Use Python 3.10 or newer. The example needs no extra packages or account access.
 
 ```bash
 python -m unittest discover -s tests -v
 python run.py
 ```
 
-Open `build/index.html`. The pipeline exports weekly demand, lane-level backtests,
-forecast intervals, CRM weighting and the capacity plan. A downloadable
-[sample report](sample/index.html) and [Excel scenario model](excel/capacity-plan.xlsx)
-are included.
+Open `build/index.html`. The run also saves CSV files containing the forecasts, checks and capacity choices.
 
-## What was measured
+## How it works
 
-| Measure | Result on synthetic data |
-|---|---:|
-| Lanes | 6 |
-| Training / held-out weeks | 104 / 12 |
-| Held-out forecast WAPE | 5.72% |
-| Coverage of the nominal 90% residual band | 79.17% |
-| Expected weekly scenario cost | $508,718.33 |
-| Cost difference versus reserving rounded mean demand | $3,999.16 |
+1. Use past weekly shipments to look for trends and seasonal changes.
+2. Compare the forecast with two simpler ways of estimating demand.
+3. Include sales opportunities that have not already been booked.
+4. Compare the cost of different capacity choices.
+5. Save a weekly plan for review.
 
-The seasonal trend model beats both simple baselines on five lanes. On L06, a
-late demand shift makes seasonal naive slightly better. The interval undercovers,
-especially after that shift. These failures are part of the result and are retained
-in `sample/backtest_scores.csv` and `sample/forecast_detail.csv`.
+## What the sample results mean
 
-The cost difference is a model comparison on the same residual scenarios, not realized
-business savings. Rates, demand and customer opportunities are all illustrative.
+The example uses made-up records: 104 weeks to build the forecast and 12 later weeks to check it. Across six routes, total absolute forecast error was 5.72% of total actual demand.
 
-## Method
+The forecast beat both simpler methods on five routes, but not on the sixth. Its expected range captured about 79% of the checked values, below the intended 90%. That means the range was too narrow and needs improvement.
 
-```mermaid
-flowchart LR
-  H[Weekly booked loads] --> F[Forecast and temporal backtest]
-  C[CRM snapshots and known outcomes] --> W[Stage win-rate calibration]
-  W --> D[Incremental unbooked demand]
-  F --> S[Demand scenarios]
-  D --> S
-  S --> O[Contract and spot cost comparison]
-  O --> P[Weekly capacity review]
-  P --> X[Excel and BI extracts]
-```
+The cost comparison is a planning example, not a claim of actual savings. Demand, rates and sales opportunities are all sample inputs.
 
-The forecast uses an intercept, linear trend and annual sine/cosine terms. A last-four-week
-mean and seasonal naive forecast provide honest baselines on the same horizon.
-Calibration residuals use only prior observations. The test period is not used in
-the training fit. After evaluation, the next-week plan is fit using all observed weeks.
+## Excel planning sheet
 
-CRM stage probabilities use historical outcomes known by the cutoff with a Beta(2,2)
-prior. Only unbooked open opportunities add demand. SQL keeps future outcomes out of
-calibration. The `crm.py` adapter is GET-only and has mocked pagination tests. Live
-CRM extraction and tenant-specific field mapping have not been validated.
+![Excel demand and cost model](excel/preview.png)
 
-The capacity search evaluates every whole-load contract allocation up to maximum
-scenario demand. It pays reserved capacity in full, limits spot supply to 25 loads
-per lane, and applies a shortfall penalty. This is a small planning model, not a
-network-routing optimizer.
+Change demand, reserved loads and unit costs to see the effect on the plan. The sheet calculates costs for the demand you enter; the browser report averages several possible demand outcomes, so the totals can differ.
 
-## Review the work
+## More detail
 
-- [Forecasting and cost model](planning.py)
-- [CRM calibration SQL](sql/crm_pipeline.sql)
-- [Model assumptions and limitations](docs/method.md)
-- [Power BI and Tableau calculations](bi/README.md)
-- [Weekly planning workflow](integrations/README.md)
-- [Development workflow](docs/development.md)
+- [Forecast assumptions](docs/method.md)
+- [Power BI and Tableau setup](bi/README.md)
+- [Weekly planning steps](integrations/README.md)
+- [Forecast and cost calculations](planning.py)
 
-## Excel model
-
-The workbook lets a planner change demand, reservations and unit costs. Its cost is
-for the entered deterministic demand, so it differs from the scenario-average metric
-above. Input sensitivity, formulas and rendering were checked during authoring.
-Native Excel refresh through Power Automate remains a tenant acceptance check.
-No employer records, private application details or commercial rates are included.
+The Zoho CRM connection only reads records. It has been checked with sample responses, but has not been tested with a live CRM account. The BI files are starting queries and calculations, not finished Power BI or Tableau reports.

@@ -15,15 +15,15 @@ if __name__ == "__main__":
     render(
         "build/index.html",
         "Freight capacity planning",
-        "Weekly demand, CRM opportunity weighting and a costed contract-versus-spot decision.",
+        "Estimate next week’s loads and compare the cost of reserving capacity with booking extra capacity later.",
         {
             "Lanes": 6,
-            "Test forecast WAPE": f"{metrics['forecast_wape']:.1%}",
-            "Interval coverage": f"{metrics['interval_coverage']:.1%}",
-            "Scenario cost difference": f"${metrics['scenario_cost_difference_usd']:,.0f}",
+            "Forecast error (WAPE)": f"{metrics['forecast_wape']:.1%}",
+            "Weeks within forecast range": f"{metrics['interval_coverage']:.1%}",
+            "Sample cost difference": f"${metrics['scenario_cost_difference_usd']:,.0f}",
         },
         plans,
-        "Backtesting holds out 12 weeks after 104 training weeks. The demand generator includes a late regime change on L06. Interval coverage is measured, not guaranteed. Capacity recommendations minimize expected scenario cost under fixed illustrative rates and a 25-load spot limit. The reported difference is against reserving rounded mean demand on the same scenarios, not realized savings.",
+        "The forecast uses 104 weeks of sample history and is checked against the next 12 weeks. One route changes demand sharply near the end. Forecast error is the total absolute error divided by total actual loads (WAPE). The forecast range aims to cover 90% of weeks; the measured result is shown above. The plan compares sample costs with a limit of 25 extra loads. The cost difference is against reserving average demand, not savings achieved in a business.",
         chart=chart,
     )
     print(json.dumps(metrics, indent=2))
